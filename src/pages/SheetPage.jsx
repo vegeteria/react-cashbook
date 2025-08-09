@@ -113,16 +113,16 @@ const SheetPage = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold">{sheet.sheetName}</h2>
-        <div className="flex items-center">
-          <div className="stat">
+      <div className="flex flex-col md:flex-row justify-between items-center mb-4">
+        <h2 className="text-2xl font-bold mb-4 md:mb-0">{sheet.sheetName}</h2>
+        <div className="flex flex-col md:flex-row items-center">
+          <div className="stat mb-4 md:mb-0">
             <div className="stat-title">Total Balance</div>
             <div className="stat-value">{totalBalance.toFixed(2)}</div>
           </div>
-          <button onClick={() => navigate('/')} className="btn btn-secondary ml-4">Back to Sheets</button>
-          <button onClick={generatePdf} className="btn btn-success ml-4">Generate PDF</button>
-          <button onClick={handleSave} className="btn btn-primary ml-4">Save</button>
+          <button onClick={() => navigate('/')} className="btn btn-secondary mb-2 md:mb-0 md:ml-4">Back to Sheets</button>
+          <button onClick={generatePdf} className="btn btn-success mb-2 md:mb-0 md:ml-4">Generate PDF</button>
+          <button onClick={handleSave} className="btn btn-primary md:ml-4">Save</button>
         </div>
       </div>
       <div className="form-control grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">

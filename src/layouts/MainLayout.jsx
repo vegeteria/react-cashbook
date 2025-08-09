@@ -8,7 +8,7 @@ const MainLayout = ({ children }) => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex flex-col md:flex-row justify-between items-center mb-4">
         <h1 className="text-4xl font-bold">Cashbook</h1>
         <div className="flex items-center">
           {currentUser && <span className="mr-4">Welcome, {currentUser.username}</span>}
