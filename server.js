@@ -1,11 +1,13 @@
 import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
+import jwt from 'jsonwebtoken';
 import { connectToDb, getDb } from './src/db.js';
 import { ObjectId } from 'mongodb';
 
 const app = express();
 const port = 5000;
+const jwtSecret = 'your-secret-key'; // It's better to use an environment variable for this
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -42,10 +44,26 @@ app.post('/api/login', async (req, res) => {
   const user = await db.collection('users').findOne({ username, password });
 
   if (user) {
-    res.json({ message: 'Login successful', userId: user._id });
+    const token = jwt.sign({ userId: user._id, username: user.username }, jwtSecret, { expiresIn: '1d' });
+    res.json({ message: 'Login successful', userId: user._id, token });
   } else {
     res.status(401).json({ message: 'Invalid credentials' });
   }
+});
+
+// Verify token
+app.post('/api/verify-token', (req, res) => {
+  const { token } = req.body;
+  if (!token) {
+    return res.status(401).json({ message: 'No token provided' });
+  }
+
+  jwt.verify(token, jwtSecret, (err, decoded) => {
+    if (err) {
+      return res.status(401).json({ message: 'Invalid token' });
+    }
+    res.json({ message: 'Token is valid', userId: decoded.userId, username: decoded.username });
+  });
 });
 
 // Save sheet data

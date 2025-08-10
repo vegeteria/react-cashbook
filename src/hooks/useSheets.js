@@ -21,7 +21,8 @@ const useSheets = () => {
         }),
       });
       if (response.ok) {
-        // Refetch sheets to update the list
+        const newSheet = await response.json();
+        // Manually refetch or update the context
         const refetchResponse = await fetch(`${apiUrl}/api/sheets/${currentUser.userId}`);
         const fetchedSheets = await refetchResponse.json();
         setCurrentUser({ ...currentUser, sheets: fetchedSheets });
@@ -36,13 +37,15 @@ const useSheets = () => {
       const response = await fetch(`${apiUrl}/api/sheets/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sheetName: newName }), // Ensure backend expects sheetName
+        body: JSON.stringify({ sheetName: newName }),
       });
       if (response.ok) {
-        const updatedSheets = sheets.map((sheet) =>
-          sheet._id === id ? { ...sheet, sheetName: newName } : sheet
-        );
-        setCurrentUser({ ...currentUser, sheets: updatedSheets });
+        setCurrentUser(prevUser => ({
+          ...prevUser,
+          sheets: prevUser.sheets.map((sheet) =>
+            sheet._id === id ? { ...sheet, sheetName: newName } : sheet
+          ),
+        }));
       }
     } catch (error) {
       console.error('Error updating sheet:', error);
@@ -55,8 +58,10 @@ const useSheets = () => {
         method: 'DELETE',
       });
       if (response.ok) {
-        const updatedSheets = sheets.filter((sheet) => sheet._id !== id);
-        setCurrentUser({ ...currentUser, sheets: updatedSheets });
+        setCurrentUser(prevUser => ({
+          ...prevUser,
+          sheets: prevUser.sheets.filter((sheet) => sheet._id !== id),
+        }));
       }
     } catch (error) {
       console.error('Error deleting sheet:', error);
@@ -64,40 +69,46 @@ const useSheets = () => {
   };
 
   const addTransaction = (sheetId, transaction) => {
-    const updatedSheets = sheets.map((sheet) =>
-      sheet._id === sheetId
-        ? { ...sheet, transactions: [...sheet.transactions, transaction] }
-        : sheet
-    );
-    setCurrentUser({ ...currentUser, sheets: updatedSheets });
+    setCurrentUser(prevUser => ({
+      ...prevUser,
+      sheets: prevUser.sheets.map((sheet) =>
+        sheet._id === sheetId
+          ? { ...sheet, transactions: [...sheet.transactions, transaction] }
+          : sheet
+      ),
+    }));
   };
 
   const updateTransaction = (sheetId, transactionId, newTransaction) => {
-    const updatedSheets = sheets.map((sheet) =>
-      sheet._id === sheetId
-        ? {
-            ...sheet,
-            transactions: sheet.transactions.map((t) =>
-              t.id === transactionId ? newTransaction : t
-            ),
-          }
-        : sheet
-    );
-    setCurrentUser({ ...currentUser, sheets: updatedSheets });
+    setCurrentUser(prevUser => ({
+      ...prevUser,
+      sheets: prevUser.sheets.map((sheet) =>
+        sheet._id === sheetId
+          ? {
+              ...sheet,
+              transactions: sheet.transactions.map((t) =>
+                t.id === transactionId ? newTransaction : t
+              ),
+            }
+          : sheet
+      ),
+    }));
   };
 
   const deleteTransaction = (sheetId, transactionId) => {
-    const updatedSheets = sheets.map((sheet) =>
-      sheet._id === sheetId
-        ? {
-            ...sheet,
-            transactions: sheet.transactions.filter(
-              (t) => t.id !== transactionId
-            ),
-          }
-        : sheet
-    );
-    setCurrentUser({ ...currentUser, sheets: updatedSheets });
+    setCurrentUser(prevUser => ({
+      ...prevUser,
+      sheets: prevUser.sheets.map((sheet) =>
+        sheet._id === sheetId
+          ? {
+              ...sheet,
+              transactions: sheet.transactions.filter(
+                (t) => t.id !== transactionId
+              ),
+            }
+          : sheet
+      ),
+    }));
   };
 
   return {
