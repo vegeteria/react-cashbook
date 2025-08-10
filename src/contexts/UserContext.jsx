@@ -10,7 +10,9 @@ export const UserProvider = ({ children }) => {
 
   const fetchSheetsForUser = async (userId, username) => {
     try {
-      const response = await fetch(`${apiUrl}/api/sheets/${userId}`);
+      const response = await fetch(`${apiUrl}/api/sheets/${userId}`, {
+        credentials: 'include',
+      });
       if (response.ok) {
         const sheets = await response.json();
         setCurrentUser({ username, userId, sheets });
@@ -26,25 +28,20 @@ export const UserProvider = ({ children }) => {
 
   useEffect(() => {
     const verifyUser = async () => {
-      const token = localStorage.getItem('token');
-      if (token) {
-        try {
-          const response = await fetch(`${apiUrl}/api/verify-token`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ token }),
-          });
-
-          if (response.ok) {
-            const data = await response.json();
-            await fetchSheetsForUser(data.userId, data.username);
-          } else {
-            localStorage.removeItem('token');
-          }
-        } catch (error) {
-          console.error('Token verification error:', error);
-          localStorage.removeItem('token');
+      try {
+        const response = await fetch(`${apiUrl}/api/me`, {
+          method: 'GET',
+          credentials: 'include',
+        });
+        if (response.ok) {
+          const data = await response.json();
+          await fetchSheetsForUser(data.userId, data.username);
+        } else {
+          setCurrentUser(null);
         }
+      } catch (error) {
+        console.error('Auth check error:', error);
+        setCurrentUser(null);
       }
       setLoading(false);
     };
@@ -57,12 +54,12 @@ export const UserProvider = ({ children }) => {
       const response = await fetch(`${apiUrl}/api/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ username, password }),
       });
 
       if (response.ok) {
         const data = await response.json();
-        localStorage.setItem('token', data.token);
         await fetchSheetsForUser(data.userId, username);
         return true;
       }
@@ -78,11 +75,14 @@ export const UserProvider = ({ children }) => {
       const response = await fetch(`${apiUrl}/api/signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ username, password }),
       });
 
       if (response.ok) {
-        return await login(username, password);
+        const data = await response.json();
+        await fetchSheetsForUser(data.userId, username);
+        return true;
       }
       return false;
     } catch (error) {
@@ -91,8 +91,10 @@ export const UserProvider = ({ children }) => {
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('token');
+  const logout = async () => {
+    try {
+      await fetch(`${apiUrl}/api/logout`, { method: 'POST', credentials: 'include' });
+    } catch (_) {}
     setCurrentUser(null);
   };
 

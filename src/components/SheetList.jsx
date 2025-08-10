@@ -12,7 +12,7 @@ const SheetList = ({ sheets, deleteSheet, updateSheet }) => {
     const fetchSheets = async () => {
       if (currentUser && currentUser.userId) {
         try {
-          const response = await fetch(`${apiUrl}/api/sheets/${currentUser.userId}`);
+          const response = await fetch(`${apiUrl}/api/sheets/${currentUser.userId}`, { credentials: 'include' });
           if (response.ok) {
             const fetchedSheets = await response.json();
             setCurrentUser({ ...currentUser, sheets: fetchedSheets });

@@ -84,6 +84,7 @@ const SheetPage = () => {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({
           sheetName: sheet.sheetName,
           transactions: sheet.transactions,
